@@ -9,5 +9,13 @@ export default defineConfig({
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },
+    cors: true,
+    proxy: {
+      '/api/proxy-image': {
+        target: 'https://loremflickr.com', // Replace with the image's base URL
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/proxy-image/, ''),
+      },
+    },
   },
 })
