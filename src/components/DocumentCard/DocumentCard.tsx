@@ -4,11 +4,13 @@ import './DocumentCard.css';
 import { DocumentCardProps } from '../../types/App.types';
 
 function getProxiedImageUrl(originalUrl: string): string {
-  return `/api/proxy-image/${encodeURIComponent(originalUrl)}`;
+  return `/api/proxy-image?url=${encodeURIComponent(originalUrl)}`;
 }
 
 const DocumentCard: React.FC<DocumentCardProps> = React.memo(({ doc, onImageClick }) => {
-  const imageUrl = getProxiedImageUrl('640/320');
+  const imageUrl = useMemo(() => {
+    return getProxiedImageUrl('https://loremflickr.com/640/320');
+  }, [doc.type]);
 
   return (
     <div className="document-card">
