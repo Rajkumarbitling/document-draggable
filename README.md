@@ -30,14 +30,16 @@ This project uses Docker Compose to set up a development environment for a React
 ### Starting the Application
 
 To start the service:
-bash
-docker-compose up
-
+  ```bash
+  docker-compose up
+  ```
 
 ### Accessing the Application
 
 Open your web browser and navigate to:
-http://localhost:3000
+  ```bash
+  http://localhost:3000
+  ```
 
 
 ### Stopping the Application
