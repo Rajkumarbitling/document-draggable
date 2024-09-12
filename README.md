@@ -45,9 +45,9 @@ Open your web browser and navigate to:
 ### Stopping the Application
 
 To stop the service:
-bash
-docker-compose down
-
+  ```bash
+  docker-compose down
+  ```
 
 ## Development
 
