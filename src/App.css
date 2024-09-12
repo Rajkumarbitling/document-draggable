@@ -1,0 +1,19 @@
+:root {
+  --container-padding: 20px;
+}
+.app-container {
+  padding: var(--container-padding);
+  width: calc(100vw - (var(--container-padding)*2));
+  overflow: hidden;
+}
+
+.document-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 20px;
+  place-items: center;
+}
+
+.w-100 {
+  width: 100%;
+}
