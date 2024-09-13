@@ -1,11 +1,24 @@
-# React + Vite
+# Document Viewer App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## How to Run
 
-Currently, two official plugins are available:
+1. Install dependencies:
+  ```bash
+  npm install
+  ```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+2. Run the application:
+  ```bash
+  npm run dev
+  ```
+
+3. Open `http://localhost:5173` in your browser.
+
+### Features
+- Drag-and-drop to reorder cards.
+- Click on any card to view the image in an overlay.
+- Press ESC to close the overlay.
+
 
 # Docker Compose Setup for React Application
 
