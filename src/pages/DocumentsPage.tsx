@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import DocumentCard from '../components/DocumentCard/DocumentCard';
 import Overlay from '../components/Overlay/Overlay';
 import { worker, getDocuments, saveDocuments } from '../mocks/browser';
@@ -20,34 +21,51 @@ const Saving = () => (
   </LoaderOverlay>
 );
 
+// Draggable Document component
+const DraggableDocument: React.FC<{ doc: Document; index: number; moveDocument: (dragIndex: number, hoverIndex: number) => void; onImageClick: (url: string) => void }> = ({ doc, index, moveDocument, onImageClick }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [, drop] = useDrop({
+    accept: 'document',
+    hover(item: { index: number }, monitor) {
+      if (!ref.current) return;
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      if (dragIndex === hoverIndex) return;
+      moveDocument(dragIndex, hoverIndex);
+      item.index = hoverIndex;
+    },
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    type: 'document',
+    item: () => ({ id: doc.id, index }),
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  drag(drop(ref));
+
+  return (
+    <div ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }} className='w-100'>
+      <DocumentCard doc={doc} onImageClick={onImageClick} />
+    </div>
+  );
+};
+
 // Document List component
-const DocumentList: React.FC<{ documents: Document[], onImageClick: (url: string) => void, onDragEnd: (result: DropResult) => void }> = ({ documents, onImageClick, onDragEnd }) => (
-  <DragDropContext onDragEnd={onDragEnd}>
-    <Droppable droppableId="documents" direction="horizontal">
-      {(provided) => (
-        <div {...provided.droppableProps} ref={provided.innerRef} className="document-grid">
-          {documents.map((doc, index) => (
-            <Draggable key={doc.id} draggableId={doc.id} index={index}>
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  className='w-100'
-                >
-                  <DocumentCard 
-                    doc={doc} 
-                    onImageClick={onImageClick}
-                  />
-                </div>
-              )}
-            </Draggable>
-          ))}
-          {provided.placeholder}
-        </div>
-      )}
-    </Droppable>
-  </DragDropContext>
+const DocumentList: React.FC<{ documents: Document[], onImageClick: (url: string) => void, moveDocument: (dragIndex: number, hoverIndex: number) => void }> = ({ documents, onImageClick, moveDocument }) => (
+  <div className="document-grid">
+    {documents.map((doc, index) => (
+      <DraggableDocument
+        key={doc.id}
+        doc={doc}
+        index={index}
+        moveDocument={moveDocument}
+        onImageClick={onImageClick}
+      />
+    ))}
+  </div>
 );
 
 const DocumentsPage: React.FC = () => {
@@ -123,15 +141,13 @@ const DocumentsPage: React.FC = () => {
 
 
   // onDragEnd save the reordered documents
-  const handleDragEnd = useCallback((result: DropResult): void => {
-    if (!result.destination) return;
-
-    setDocuments(prevDocs => {
-      const items = Array.from(prevDocs);
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(result.destination!.index, 0, reorderedItem);
-
-      const reorderedDocuments = items.map((item, index) => ({
+  const moveDocument = useCallback((dragIndex: number, hoverIndex: number) => {
+    setDocuments((prevDocs) => {
+      const newDocs = [...prevDocs];
+      const [removed] = newDocs.splice(dragIndex, 1);
+      newDocs.splice(hoverIndex, 0, removed);
+      
+      const reorderedDocuments = newDocs.map((item, index) => ({
         ...item,
         position: index
       }));
@@ -153,9 +169,9 @@ const DocumentsPage: React.FC = () => {
   }
 
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       {documents.length > 0 ? (
-        <DocumentList documents={documents} onImageClick={handleImageClick} onDragEnd={handleDragEnd} />
+        <DocumentList documents={documents} onImageClick={handleImageClick} moveDocument={moveDocument} />
       ) : (
         <div>No documents available.</div>
       )}
@@ -169,7 +185,7 @@ const DocumentsPage: React.FC = () => {
           Last saved: {timeSinceLastSave} ago
         </div>
       )}
-    </>
+    </DndProvider>
   );
 }
 
